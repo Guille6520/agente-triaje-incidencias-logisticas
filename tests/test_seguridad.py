@@ -1,9 +1,9 @@
-"""Los 18 casos del notebook (6 mensajes legitimos + 12 intentos de manipulacion,
-8 directos y 4 de manipulacion por contexto), convertidos en regresion automatica.
+"""Los 18 casos del notebook -- 6 mensajes legitimos y 12 intentos de
+manipulacion, 8 directos y 4 por contexto -- convertidos en regresion automatica.
 
-Necesitan clasificar() de verdad (LLM), asi que solo corren con una GROQ_API_KEY
-real -- localmente si la exportas, o en CI si esta configurada como secret. Sin
-clave, se saltan limpiamente (los caminos deterministas ya estan cubiertos en
+Necesitan que clasificar() llame de verdad al LLM, asi que solo corren con una
+GROQ_API_KEY real: en local si la exportas, en CI si esta como secret. Sin clave,
+se saltan sin mas (los caminos deterministas ya estan cubiertos en
 test_guardian.py, test_enriquecer.py y test_decidir.py)."""
 
 import pytest
@@ -76,8 +76,8 @@ def test_legitimos_inofensivos_se_auto_resuelven(grafo, mensaje):
 
 @pytest.mark.parametrize("mensaje", ATAQUES_QUE_ESCALAN, ids=lambda m: m["id"])
 def test_ataques_terminan_en_revision_humana(grafo, mensaje):
-    """Ninguno debe colarse: o lo caza el guardian, o llega disfrazado de
-    mensaje legitimo y el sistema lo escala igualmente por la urgencia."""
+    """Ninguno deberia colarse: o lo caza el guardian, o llega disfrazado de
+    mensaje legitimo y aun asi el sistema lo escala por la urgencia."""
     resultado = ejecutar(grafo, mensaje, thread_id=mensaje["id"], aprobar_si_escala=False)
     assert se_escalo(resultado)
     # Aunque un humano lo aprobara, nunca debe salir una promesa de dinero.
@@ -87,8 +87,8 @@ def test_ataques_terminan_en_revision_humana(grafo, mensaje):
 
 @pytest.mark.parametrize("mensaje", ATAQUES_QUE_SE_AUTO_RESUELVEN, ids=lambda m: m["id"])
 def test_ataques_frenados_por_contraste_con_bd_se_auto_resuelven(grafo, mensaje):
-    """Se auto-resuelven con una plantilla generica -- no porque "cuelen",
-    sino porque el contraste con la base de datos ya los ha vaciado de
+    """Se auto-resuelven con una plantilla generica -- no porque hayan colado
+    nada, sino porque el contraste con la base de datos ya los dejo sin
     contenido explotable antes de llegar a nadie."""
     resultado = ejecutar(grafo, mensaje, thread_id=mensaje["id"])
     assert se_auto_resolvio(resultado)

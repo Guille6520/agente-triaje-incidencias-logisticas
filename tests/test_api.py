@@ -1,6 +1,6 @@
-"""Tests de la API con el LLM sustituido por un doble de prueba, para poder
-comprobar el ciclo completo (clasificar -> escalar -> aprobar -> respuesta
-enviada) sin depender de una GROQ_API_KEY real ni de la red."""
+"""Tests de la API con el LLM sustituido por un doble, para poder probar el
+ciclo completo -- clasificar, escalar, aprobar, respuesta enviada -- sin
+depender de una GROQ_API_KEY real ni de tener red."""
 
 from fastapi.testclient import TestClient
 

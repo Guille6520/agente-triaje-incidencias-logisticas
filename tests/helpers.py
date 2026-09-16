@@ -16,8 +16,8 @@ def estado_inicial(mensaje: dict) -> dict:
 
 
 def ejecutar(grafo, mensaje: dict, thread_id: str, aprobar_si_escala: bool = True) -> dict:
-    """Corre el mensaje por el grafo. Si se pausa (interrupt), reanuda con la
-    decision humana indicada, para poder comprobar el resultado final."""
+    """Pasa el mensaje por el grafo y, si se pausa (interrupt), lo reanuda con
+    la decision humana indicada -- asi se puede comprobar el resultado final."""
     config = {"configurable": {"thread_id": thread_id}}
     resultado = grafo.invoke(estado_inicial(mensaje), config=config)
     if "__interrupt__" in resultado:

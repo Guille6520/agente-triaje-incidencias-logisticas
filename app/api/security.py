@@ -9,8 +9,8 @@ security = HTTPBasic()
 
 
 def requiere_revisor(credenciales: HTTPBasicCredentials = Depends(security)) -> str:
-    """Protege el panel de revision humana y los endpoints que aprueban casos.
-    Basic auth simple: no hace falta gestion de usuarios para un panel de un solo rol."""
+    """Protege el panel de revision y los endpoints que aprueban casos.
+    Basic auth a secas: para un panel de un solo rol no hace falta montar gestion de usuarios."""
     usuario_ok = secrets.compare_digest(credenciales.username, settings.review_username)
     password_ok = secrets.compare_digest(credenciales.password, settings.review_password)
     if not (usuario_ok and password_ok):

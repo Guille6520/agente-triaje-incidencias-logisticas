@@ -9,7 +9,7 @@ class Base(DeclarativeBase):
 
 
 class Pedido(Base):
-    """La tabla contra la que se contrasta cada incidencia (capa 'enriquecer')."""
+    """La tabla contra la que se contrasta cada incidencia -- de esto vive la capa 'enriquecer'."""
 
     __tablename__ = "pedidos"
 
@@ -22,7 +22,7 @@ class Pedido(Base):
 
 
 class Incidencia(Base):
-    """El registro de cada mensaje procesado. thread_id enlaza con el checkpoint de LangGraph."""
+    """El registro de cada mensaje procesado. El thread_id es el enlace con el checkpoint de LangGraph."""
 
     __tablename__ = "incidencias"
 
