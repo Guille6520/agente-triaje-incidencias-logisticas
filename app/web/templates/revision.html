@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block titulo %}Bandeja de revisión{% endblock %}
+{% block contenido %}
+  <h1>Casos pendientes de aprobación humana</h1>
+  {% if not pendientes %}
+    <p>No hay casos pendientes ahora mismo.</p>
+  {% endif %}
+  {% for caso in pendientes %}
+  <div class="card">
+    <p><strong>{{ caso.asunto or '(sin asunto)' }}</strong> — de {{ caso.remitente }}</p>
+    <dl>
+      <dt>Tipo</dt><dd>{{ caso.tipo_incidencia or '—' }} (urgencia: {{ caso.urgencia or '—' }})</dd>
+      <dt>Pedido</dt><dd>{{ caso.numero_pedido or '—' }}</dd>
+      <dt>Mensaje original</dt><dd><pre>{{ caso.cuerpo_mensaje }}</pre></dd>
+      {% if caso.discrepancia %}<dt>Discrepancia</dt><dd>{{ caso.discrepancia }}</dd>{% endif %}
+      <dt>Motivo de la decisión</dt><dd>{{ caso.motivo_decision or '—' }}</dd>
+      {% if caso.motivo_verificacion %}<dt>Veredicto del verificador</dt><dd>{{ caso.motivo_verificacion }}</dd>{% endif %}
+      <dt>Borrador propuesto</dt><dd><pre>{{ caso.respuesta_borrador or '(no hay borrador que enviar; el guardián lo cazó antes de generar uno)' }}</pre></dd>
+    </dl>
+    <form method="post" action="/revision/{{ caso.thread_id }}" style="display:inline">
+      <input type="hidden" name="aprobado" value="si">
+      <button type="submit">Aprobar y enviar</button>
+    </form>
+    <form method="post" action="/revision/{{ caso.thread_id }}" style="display:inline">
+      <input type="hidden" name="aprobado" value="no">
+      <button type="submit" class="rechazar">Rechazar</button>
+    </form>
+  </div>
+  {% endfor %}
+{% endblock %}

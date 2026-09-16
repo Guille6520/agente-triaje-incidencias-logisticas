@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titulo %}Enviar incidencia{% endblock %}
+{% block contenido %}
+  <h1>Simular un mensaje de cliente</h1>
+  <p>Esto simula la llegada de una incidencia (por ejemplo, desde un ticketing o un correo entrante). El mensaje pasa por las 6 capas del agente en tiempo real.</p>
+  <form method="post" action="/">
+    <label>Remitente (email)</label>
+    <input type="email" name="remitente" required placeholder="carlos.lopez@mercadona.es">
+    <label>Asunto</label>
+    <input type="text" name="asunto" placeholder="Mi pedido 45231 no ha llegado">
+    <label>Mensaje</label>
+    <textarea name="cuerpo_mensaje" required placeholder="Buenos días, el pedido 45231 debería haber llegado y no está..."></textarea>
+    <button type="submit">Enviar</button>
+  </form>
+{% endblock %}
