@@ -1,6 +1,6 @@
-"""Conecta el grafo (LangGraph, con su propio checkpointer) con la tabla `incidencias`
-(SQLAlchemy), que es la que usa la API/panel para listar y mostrar casos sin tener
-que hablar el protocolo de checkpoints de LangGraph."""
+"""Hace de puente entre el grafo (que lleva su propio checkpointer de LangGraph)
+y la tabla `incidencias` de SQLAlchemy. Asi la API y el panel pueden listar y
+mostrar casos sin tener que entender el protocolo de checkpoints de LangGraph."""
 
 import uuid
 
@@ -33,8 +33,9 @@ def procesar_mensaje(grafo, mensaje: dict, db: Session) -> Incidencia:
     pausado = "__interrupt__" in resultado
     estado = "auto_resuelto" if resultado.get("nodo_actual") == "auto_resuelto" else "pendiente_revision"
     if not pausado and estado == "pendiente_revision":
-        # No deberia pasar (todo camino que no es auto_resuelto pasa por revisar_humano,
-        # que siempre interrumpe), pero si pasa, no lo demos por bueno en silencio.
+        # No deberia pasar nunca -- todo camino que no acaba en auto_resuelto pasa
+        # por revisar_humano, que siempre interrumpe -- pero si pasa, que no se
+        # cuele en silencio.
         estado = "pendiente_revision"
 
     incidencia = Incidencia(

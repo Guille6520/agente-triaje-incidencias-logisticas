@@ -7,10 +7,10 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     modelo_llm: str = "meta-llama/llama-4-scout-17b-16e-instruct"
 
-    # SQLAlchemy: datos de negocio (pedidos, incidencias)
+    # Datos de negocio (pedidos, incidencias), via SQLAlchemy
     database_url: str = "sqlite:///./triaje.db"
 
-    # Cadena de conexion "pelada" para el checkpointer de LangGraph (solo Postgres)
+    # Cadena de conexion a pelo (sin +psycopg) para el checkpointer de LangGraph -- solo aplica con Postgres
     postgres_dsn: str = ""
 
     review_username: str = "admin"

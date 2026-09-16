@@ -1,8 +1,10 @@
-"""El checkpointer es lo que permite que interrupt() pause el grafo de verdad:
-sin el, el estado no sobrevive entre el invoke que se pausa y el que reanuda.
+"""Sin checkpointer, interrupt() no sirve de nada: el estado no sobrevive entre
+el invoke que pausa y el que reanuda, asi que esto es lo que hace posible la
+pausa de verdad.
 
-En produccion (docker-compose) usamos Postgres. En local, sin Postgres instalado,
-cae a un fichero SQLite para poder desarrollar y correr los tests sin infraestructura.
+En produccion (docker-compose) es Postgres. En local, si no tienes Postgres
+instalado, cae a un fichero SQLite -- asi puedo desarrollar y correr los tests
+sin montar infraestructura.
 """
 
 from contextlib import contextmanager

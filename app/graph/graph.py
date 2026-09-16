@@ -1,9 +1,10 @@
-"""El grafo de 6 capas del prototipo, con una diferencia clave de produccion:
-en el notebook, 'escalar' y 'guardar' eran solo etiquetas de enrutado (no bloqueaban
-nada). Aqui ambos casos convergen en `revisar_humano`, que llama a `interrupt()` y
-PAUSA el grafo de verdad hasta que una persona aprueba o rechaza desde el panel.
-Solo `auto_resuelto` (100% deterministico, sin texto libre de un LLM) sale sin pasar
-por nadie -- que es justo el reparto de riesgo que describe el README del prototipo.
+"""El mismo grafo de 6 capas del prototipo, con una diferencia de produccion que
+importa: en el notebook, 'escalar' y 'guardar' eran solo etiquetas de enrutado,
+no bloqueaban nada de verdad. Aqui los dos casos convergen en `revisar_humano`,
+que llama a `interrupt()` y pausa el grafo de verdad hasta que alguien aprueba o
+rechaza desde el panel. Lo unico que sale sin pasar por una persona es
+`auto_resuelto` -- 100% deterministico, sin una linea de texto libre de un LLM --
+que es exactamente el reparto de riesgo que ya explicaba el README del prototipo.
 """
 
 from langgraph.graph import END, START, StateGraph
@@ -48,13 +49,13 @@ def router_decidir(state):
 
 
 def router_verificar(_state):
-    # Segura o no, un borrador libre de un LLM siempre pasa por una persona.
+    # Segura o no, un borrador escrito por el LLM pasa siempre por una persona.
     return "revisar_humano"
 
 
 def crear_grafo(checkpointer):
-    """El checkpointer es inyectable: MemorySaver en tests, PostgresSaver en produccion.
-    Sin checkpointer, interrupt() no tiene donde guardar el estado y no puede pausar ni reanudar."""
+    """El checkpointer se inyecta: MemorySaver en los tests, PostgresSaver en produccion.
+    Sin el, interrupt() no tiene donde dejar el estado y no hay pausa ni reanudacion que valga."""
     b = StateGraph(IncidenciaState)
     b.add_node("guardian", guardian)
     b.add_node("clasificar", clasificar)

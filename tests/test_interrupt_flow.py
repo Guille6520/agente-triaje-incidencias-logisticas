@@ -1,6 +1,6 @@
-"""Valida la pieza mas nueva frente al prototipo: que el control humano es un
-bloqueo real (interrupt de LangGraph) y no solo un enrutado, y que aprobar o
-rechazar cambia el resultado final tal como se espera."""
+"""Valida la pieza mas nueva respecto al prototipo: que el control humano ahora
+es un bloqueo real (interrupt de LangGraph) y no solo un enrutado, y que
+aprobar o rechazar cambia el resultado final como toca."""
 
 from langgraph.types import Command
 
@@ -32,10 +32,10 @@ def test_reanudar_con_rechazo_no_produce_respuesta(grafo):
 
 
 def test_reanudar_con_aprobacion_marca_aprobada_por_humano(grafo):
-    # Mismo caso que arriba (el guardian lo caza sin gastar el LLM): aqui el
-    # foco es la mecanica de aprobacion, no la respuesta en si (que sera None
-    # porque nunca se llego a generar un borrador). El caso "hay un borrador
-    # real que se envia al aprobar" se cubre en test_api.py con clasificar
+    # Mismo caso que arriba (el guardian lo caza sin gastar el LLM): aqui
+    # interesa la mecanica de aprobacion, no la respuesta en si -- sera None
+    # porque nunca llego a generarse un borrador. El caso con un borrador real
+    # que se envia al aprobar esta cubierto en test_api.py, con clasificar
     # mockeado.
     config = {"configurable": {"thread_id": "t-aprobacion"}}
     grafo.invoke(estado_inicial(ATAQUE_INJECTION), config=config)
