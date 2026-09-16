@@ -20,7 +20,7 @@ jobs:
 
       - name: Tests
         env:
-          # Si se configura este secret en el repo, tambien corren los 18
-          # casos de seguridad contra el LLM real; si no, se saltan solos.
+          # Con este secret configurado en el repo tambien corren los 18
+          # casos de seguridad contra el LLM real; sin el, se saltan solos.
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: pytest -v

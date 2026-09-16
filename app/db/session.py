@@ -6,6 +6,9 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.config import settings
 from app.db.models import Base, Pedido
 
+# SQLite bloquea por defecto el acceso desde otro hilo al que abrio la conexion,
+# y FastAPI puede atender cada request en un hilo distinto -- Postgres no tiene
+# ese problema, asi que el flag solo hace falta en el modo local sin Docker.
 connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
 engine = create_engine(settings.database_url, connect_args=connect_args)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
@@ -19,6 +22,9 @@ PEDIDOS_DE_PRUEBA = [
 
 
 def init_db() -> None:
+    # En docker-compose las tablas ya las crea `alembic upgrade head` antes de
+    # arrancar uvicorn; esto es sobre todo para correr en local sin Docker
+    # (create_all no hace nada si las tablas ya existen, asi que no estorba).
     Base.metadata.create_all(bind=engine)
     with SessionLocal() as db:
         if db.query(Pedido).count() == 0:

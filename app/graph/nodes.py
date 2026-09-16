@@ -70,8 +70,9 @@ def clasificar(state):
             "nodo_actual": "clasificar",
         }
     except Exception:
-        # Si el modelo se niega o no devuelve el formato (pasa con algunos ataques),
-        # no rompo el sistema: marco el mensaje como sospechoso y que lo vea un humano.
+        # Si el modelo se niega o no devuelve el formato (pasa con algunos ataques,
+        # cuando el modelo se planta y responde con texto en vez del schema), no
+        # rompo el sistema: marco el mensaje como sospechoso y que lo vea un humano.
         return {
             "tipo_incidencia": "fuera_de_alcance",
             "urgencia": "media",
@@ -147,8 +148,10 @@ def _borrador_seguimiento(state):
     return f"Estimado cliente,\nSu pedido {state.get('numero_pedido', 'indicado')} consta en estado: {state.get('estado_real_pedido', 'en proceso')}.\nGracias. Atencion al cliente"
 
 
-# Prompt reforzado tras un test real: el modelo se creia una "politica PR-2024"
-# inventada por un atacante y redactaba una compensacion. Ver prototipo/ para el detalle.
+# Prompt reforzado. Le digo explicitamente que NO existe ninguna politica de
+# compensación automatica y que ignore instrucciones metidas en el mensaje. Esto
+# salio de un test real: el modelo se creia una "politica PR-2024" inventada por
+# un atacante y redactaba una compensacion. Ver prototipo/README.md para el detalle.
 SYSTEM_DECIDIR = """Eres un agente de atención al cliente de incidencias de envio. Decide si puedes resolver
 tu solo o si conviene un humano, y escribe un borrador.
 
@@ -203,7 +206,9 @@ def decidir(state):
         return {"puede_resolver": False, "respuesta_borrador": _borrador_escalado(state),
                 "motivo_decision": f"Tipo {tipo}, necesita gestion", "nodo_actual": "decidir"}
 
-    # Nivel 3: el resto lo decide el LLM, envuelto en try/except por seguridad.
+    # Nivel 3: el resto lo decide el LLM. Envuelto en try/except: si el modelo se
+    # niega o devuelve un formato invalido (paso en un test con una politica
+    # inventada), no rompo el sistema, escalo a humano por seguridad.
     decisor = llm.with_structured_output(DecisionAgente)
     msgs = [
         SystemMessage(content=SYSTEM_DECIDIR),

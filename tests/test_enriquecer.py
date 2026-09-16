@@ -13,7 +13,7 @@ def test_sin_numero_de_pedido():
 
 
 def test_detecta_fraude_titular_no_coincide():
-    """El caso central del README: alguien que no es el titular reclama un pedido ajeno."""
+    """El caso que el README pone como ejemplo central: alguien que no es el titular reclamando un pedido ajeno."""
     r = enriquecer({"numero_pedido": "54321", "remitente": "otro@gmail.com", "tipo_incidencia": "perdida"})
     assert r["pedido_existe"] is True
     assert r["titular_coincide"] is False

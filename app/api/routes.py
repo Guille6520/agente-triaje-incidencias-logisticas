@@ -12,8 +12,8 @@ router = APIRouter(prefix="/api", tags=["incidencias"])
 
 @router.post("/incidencias", response_model=IncidenciaOut)
 def crear_incidencia(mensaje: MensajeEntrante, request: Request, db: Session = Depends(get_db)):
-    """Simula la llegada de una incidencia (lo que en un sistema real seria un
-    webhook de un ticketing, un correo entrante, etc.)."""
+    """Simula que llega una incidencia nueva -- en un sistema real esto seria
+    el webhook de un ticketing, un correo entrante, lo que sea."""
     return procesar_mensaje(request.app.state.grafo, mensaje.model_dump(), db)
 
 

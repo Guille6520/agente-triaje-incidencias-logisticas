@@ -12,6 +12,9 @@ from app.web.routes import router as web_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    # El checkpointer se abre una vez, aqui, y se queda vivo mientras la app este
+    # arriba -- el grafo lo necesita para poder pausar y reanudar en cualquier
+    # request, no solo en la que lo crea.
     with checkpointer_context() as checkpointer:
         app.state.grafo = crear_grafo(checkpointer)
         yield
