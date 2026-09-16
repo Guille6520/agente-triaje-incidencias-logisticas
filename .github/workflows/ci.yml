@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependencias
+        run: pip install -r requirements-dev.txt
+
+      - name: Tests
+        env:
+          # Si se configura este secret en el repo, tambien corren los 18
+          # casos de seguridad contra el LLM real; si no, se saltan solos.
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: pytest -v

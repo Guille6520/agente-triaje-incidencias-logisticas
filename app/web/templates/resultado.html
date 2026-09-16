@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block titulo %}Resultado del triaje{% endblock %}
+{% block contenido %}
+  <h1>Resultado</h1>
+  <div class="card">
+    <span class="estado {{ incidencia.estado }}">{{ incidencia.estado.replace('_', ' ') }}</span>
+    <dl>
+      <dt>Tipo</dt><dd>{{ incidencia.tipo_incidencia or '—' }} (urgencia: {{ incidencia.urgencia or '—' }})</dd>
+      <dt>Pedido</dt><dd>{{ incidencia.numero_pedido or '—' }}</dd>
+      {% if incidencia.sospechoso %}
+      <dt>Guardián</dt><dd>Mensaje marcado como sospechoso, ni siquiera llegó al modelo.</dd>
+      {% endif %}
+      {% if incidencia.discrepancia %}
+      <dt>Discrepancia con la base de datos</dt><dd>{{ incidencia.discrepancia }}</dd>
+      {% endif %}
+      <dt>Motivo de la decisión</dt><dd>{{ incidencia.motivo_decision or '—' }}</dd>
+      {% if incidencia.motivo_verificacion %}
+      <dt>Veredicto del verificador</dt><dd>{{ incidencia.motivo_verificacion }}</dd>
+      {% endif %}
+    </dl>
+    {% if incidencia.estado == 'pendiente_revision' %}
+      <p><strong>Este caso se ha pausado de verdad</strong> y espera aprobación humana en la <a href="/revision">bandeja de revisión</a> antes de que se pueda enviar nada al cliente.</p>
+      <dt>Borrador propuesto</dt>
+      <pre>{{ incidencia.respuesta_borrador or '(sin borrador)' }}</pre>
+    {% else %}
+      <dt>Respuesta enviada</dt>
+      <pre>{{ incidencia.respuesta_final or '(sin respuesta)' }}</pre>
+    {% endif %}
+  </div>
+  <p><a href="/">← Enviar otro mensaje</a></p>
+{% endblock %}

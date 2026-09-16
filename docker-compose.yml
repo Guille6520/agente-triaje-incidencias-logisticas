@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: triaje
+      POSTGRES_PASSWORD: triaje
+      POSTGRES_DB: triaje
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U triaje"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      MODELO_LLM: ${MODELO_LLM:-meta-llama/llama-4-scout-17b-16e-instruct}
+      DATABASE_URL: postgresql+psycopg://triaje:triaje@db:5432/triaje
+      POSTGRES_DSN: postgresql://triaje:triaje@db:5432/triaje
+      REVIEW_USERNAME: ${REVIEW_USERNAME:-admin}
+      REVIEW_PASSWORD: ${REVIEW_PASSWORD:-cambia-esto}
+      SECRET_KEY: ${SECRET_KEY:-cambia-esto-tambien}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
