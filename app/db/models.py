@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, String, Text
+from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -76,6 +76,31 @@ class CasoPrueba(Base):
     # auto_resuelto | humano | sospechoso
     camino_esperado: Mapped[str] = mapped_column(String, index=True)
     notas: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+
+class ResultadoPrueba(Base):
+    """Lo que hizo un motor (Groq, Jev...) con un caso de prueba. Un resultado por caso y motor."""
+
+    __tablename__ = "resultados_prueba"
+    __table_args__ = (UniqueConstraint("caso_id", "motor"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    caso_id: Mapped[int] = mapped_column(ForeignKey("casos_prueba.id"), index=True)
+    motor: Mapped[str] = mapped_column(String, index=True)
+
+    camino_obtenido: Mapped[str] = mapped_column(String)
+    tipo_obtenido: Mapped[str | None] = mapped_column(String, nullable=True)
+    urgencia_obtenida: Mapped[str | None] = mapped_column(String, nullable=True)
+    motivo: Mapped[str | None] = mapped_column(Text, nullable=True)
+    llamadas_llm: Mapped[int] = mapped_column(default=0)
+
+    acierto_camino: Mapped[bool] = mapped_column(Boolean)
+    acierto_tipo: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    acierto_urgencia: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    # Se resolvió solo un caso que debía ir a una persona: el fallo grave.
+    fallo_critico: Mapped[bool] = mapped_column(Boolean)
+
+    creado_en: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
 
 
 class Incidencia(Base):
