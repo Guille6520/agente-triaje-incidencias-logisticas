@@ -21,7 +21,7 @@ services:
       - "8000:8000"
     environment:
       GROQ_API_KEY: ${GROQ_API_KEY}
-      MODELO_LLM: ${MODELO_LLM:-meta-llama/llama-4-scout-17b-16e-instruct}
+      MODELO_LLM: ${MODELO_LLM:-openai/gpt-oss-120b}
       DATABASE_URL: postgresql+psycopg://triaje:triaje@db:5432/triaje
       POSTGRES_DSN: postgresql://triaje:triaje@db:5432/triaje
       REVIEW_USERNAME: ${REVIEW_USERNAME:-admin}

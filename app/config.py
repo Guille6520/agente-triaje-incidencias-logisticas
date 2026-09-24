@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     groq_api_key: str = ""
-    modelo_llm: str = "meta-llama/llama-4-scout-17b-16e-instruct"
+    modelo_llm: str = "openai/gpt-oss-120b"
 
     # Datos de negocio (pedidos, incidencias), via SQLAlchemy
     database_url: str = "sqlite:///./triaje.db"

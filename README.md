@@ -74,7 +74,7 @@ Los tests de las capas deterministas (guardián, enriquecer, decidir) y el mecan
 ## Stack
 
 - **LangGraph** para el grafo de estados, con **PostgreSQL** como backend del checkpointer (lo que hace posible el `interrupt()` real)
-- **Llama 4 Scout vía Groq** como modelo — gratis, y coherente con la idea del proyecto: no le confío la seguridad a un modelo pequeño, de eso se encargan las capas deterministas
+- **gpt-oss-120b vía Groq** como modelo — gratis, y coherente con la idea del proyecto: no le confío la seguridad al modelo, de eso se encargan las capas deterministas
 - **FastAPI** para la API y el panel web (Jinja2)
 - **SQLAlchemy + Alembic** para los datos de negocio (pedidos, incidencias) sobre PostgreSQL
 - **pytest + GitHub Actions** para las pruebas, incluyendo regresión de seguridad
