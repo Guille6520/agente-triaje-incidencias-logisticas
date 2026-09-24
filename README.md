@@ -60,6 +60,16 @@ docker compose up --build
 - Panel de revisión humana: http://localhost:8000/revision (usuario/contraseña de `.env`)
 - Documentación interactiva de la API: http://localhost:8000/docs
 
+### Cómo se ve
+
+El formulario para simular un mensaje entrante:
+
+![Formulario para simular un mensaje de cliente](docs/capturas/formulario.webp)
+
+Y el resultado de un caso que el sistema resuelve solo: un daño sin foto, al que contesta pidiéndola con una plantilla fija.
+
+![Resultado de un caso auto-resuelto](docs/capturas/resultado.webp)
+
 ## Cómo correr los tests
 
 ```bash
