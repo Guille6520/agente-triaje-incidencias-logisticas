@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, String, Text
+from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -19,6 +19,63 @@ class Pedido(Base):
     valor: Mapped[float] = mapped_column(Float)
     estado: Mapped[str] = mapped_column(String)
     tiene_foto: Mapped[bool] = mapped_column(Boolean)
+
+    # Todo lo de abajo es nullable: los pedidos de prueba originales no lo traen.
+    fecha_pedido: Mapped[datetime.date | None] = mapped_column(Date, nullable=True)
+    fecha_envio: Mapped[datetime.date | None] = mapped_column(Date, nullable=True)
+    fecha_entrega_prevista: Mapped[datetime.date | None] = mapped_column(Date, nullable=True)
+    fecha_entrega_real: Mapped[datetime.date | None] = mapped_column(Date, nullable=True)
+    provincia_destino: Mapped[str | None] = mapped_column(String, nullable=True)
+    peso_kg: Mapped[float | None] = mapped_column(Float, nullable=True)
+    num_bultos: Mapped[int | None] = mapped_column(nullable=True)
+    categoria: Mapped[str | None] = mapped_column(String, nullable=True)
+    perecedero: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+
+
+class Cliente(Base):
+    """Se enlaza con pedidos por email a proposito, sin clave foranea: los pedidos de prueba originales no tienen cliente."""
+
+    __tablename__ = "clientes"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    email: Mapped[str] = mapped_column(String, unique=True, index=True)
+    nombre: Mapped[str] = mapped_column(String)
+    tipo: Mapped[str] = mapped_column(String)  # particular | empresa
+    empresa: Mapped[str | None] = mapped_column(String, nullable=True)
+    fecha_alta: Mapped[datetime.date] = mapped_column(Date)
+    reincidente: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+class Transportista(Base):
+    """Perfil de fiabilidad de cada transportista, para poder pesar sus incidencias."""
+
+    __tablename__ = "transportistas"
+
+    nombre: Mapped[str] = mapped_column(String, primary_key=True)
+    zona: Mapped[str] = mapped_column(String)
+    tasa_retraso: Mapped[float] = mapped_column(Float)
+    tasa_dano: Mapped[float] = mapped_column(Float)
+    tasa_perdida: Mapped[float] = mapped_column(Float)
+
+
+class CasoPrueba(Base):
+    """Un mensaje de cliente con la respuesta correcta ya etiquetada, para medir cualquier modelo contra el mismo banco."""
+
+    __tablename__ = "casos_prueba"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    numero_pedido: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
+    remitente: Mapped[str] = mapped_column(String)
+    asunto: Mapped[str | None] = mapped_column(String, nullable=True)
+    cuerpo_mensaje: Mapped[str] = mapped_column(Text)
+
+    # limpio | fraude | injection | ... (lo define el generador)
+    categoria: Mapped[str] = mapped_column(String, index=True)
+    tipo_esperado: Mapped[str] = mapped_column(String)
+    urgencia_esperada: Mapped[str] = mapped_column(String)
+    # auto_resuelto | humano | sospechoso
+    camino_esperado: Mapped[str] = mapped_column(String, index=True)
+    notas: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
 class Incidencia(Base):
