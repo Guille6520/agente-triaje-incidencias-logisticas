@@ -13,7 +13,7 @@ services:
       timeout: 5s
       retries: 10
     ports:
-      - "5432:5432"
+      - "5435:5432"
 
   app:
     build: .
