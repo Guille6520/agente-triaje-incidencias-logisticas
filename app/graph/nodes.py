@@ -178,6 +178,12 @@ def decidir(state):
     titular_coincide = state.get("titular_coincide")
     tiene_foto = state.get("tiene_foto")
 
+    # Lo que no es una incidencia de envio va a una persona antes de nada: si no,
+    # como no trae pedido, se comeria la plantilla de "no localizamos su incidencia".
+    if tipo == "fuera_de_alcance":
+        return {"puede_resolver": False, "respuesta_borrador": DATOS_NO_VALIDOS,
+                "motivo_decision": "No es una incidencia de envio", "nodo_actual": "decidir"}
+
     # Nivel 1: casos seguros que se auto-resuelven
     if pedido_existe is False or titular_coincide is False:
         return {"puede_resolver": True, "auto_resuelto": True, "respuesta_borrador": DATOS_NO_VALIDOS,
@@ -188,9 +194,6 @@ def decidir(state):
     if tipo == "consulta_seguimiento":
         return {"puede_resolver": True, "auto_resuelto": True, "respuesta_borrador": _borrador_seguimiento(state),
                 "motivo_decision": "Seguimiento con identidad correcta", "nodo_actual": "decidir"}
-    if tipo == "fuera_de_alcance":
-        return {"puede_resolver": False, "respuesta_borrador": DATOS_NO_VALIDOS,
-                "motivo_decision": "No es una incidencia de envio", "nodo_actual": "decidir"}
 
     # Nivel 2: reglas que escalan a humano
     if sospechoso is True:
