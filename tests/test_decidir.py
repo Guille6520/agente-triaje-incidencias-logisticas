@@ -34,6 +34,13 @@ def test_nivel1_consulta_seguimiento_auto_resuelve():
     assert r["auto_resuelto"] is True
 
 
+def test_fuera_de_alcance_sin_pedido_va_a_humano():
+    r = decidir(_base(tipo_incidencia="fuera_de_alcance", pedido_existe=False, numero_pedido="desconocido"))
+    assert r["puede_resolver"] is False
+    assert not r.get("auto_resuelto")
+    assert r["motivo_decision"] == "No es una incidencia de envio"
+
+
 def test_nivel2_guardian_sospechoso_escala():
     r = decidir(_base(sospechoso=True))
     assert r["puede_resolver"] is False
