@@ -64,24 +64,38 @@ def _espera(texto):
     return min(max(segundos, 5.0), 90.0)
 
 
-def _ejecutar(grafo, registro, caso):
+class FalloPersistente(Exception):
+    pass
+
+
+def _ejecutar(grafo, registro, caso, intentos=5):
+    """Reintenta ante CUALQUIER fallo del LLM, no solo limite de ritmo: un 503, un timeout o
+    cualquier otro tropiezo puntual de la API se tragaba en nodes.py y se guardaba como si
+    fuera un veredicto real del modelo (asi se colaron miles de falsos 'fuera_de_alcance'
+    el 26 de septiembre). Si tras varios intentos el fallo persiste, no se guarda nada: el
+    caso se queda pendiente para la proxima vez, en vez de contaminar la tabla de resultados."""
     mensaje = {"email_id": f"caso-{caso.id}", "remitente": caso.remitente,
                "asunto": caso.asunto, "cuerpo_mensaje": caso.cuerpo_mensaje}
-    for intento in range(6):
+    ultimo = None
+    for intento in range(intentos):
         registro.errores.clear()
         registro.llamadas = 0
         config = {"configurable": {"thread_id": f"caso-{caso.id}-{intento}"}}
         resultado = grafo.invoke(_estado_inicial(mensaje), config=config)
-        limites = [e for e in registro.errores if _es_rate_limit(e)]
-        if not limites:
+        if not registro.errores:
             return resultado, registro.llamadas
-        texto = str(limites[0])
+        ultimo = registro.errores[-1]
+        texto = str(ultimo)
         if _es_limite_diario(texto):
             raise CuotaAgotada(texto)
-        espera = _espera(texto)
-        print(f"   límite por minuto, espero {espera:.0f}s")
+        if _es_rate_limit(ultimo):
+            espera = _espera(texto)
+            print(f"   límite por minuto, espero {espera:.0f}s")
+        else:
+            espera = min(5 * 2 ** intento, 60)
+            print(f"   {type(ultimo).__name__}: {texto[:100]}, espero {espera:.0f}s")
         time.sleep(espera)
-    raise CuotaAgotada("demasiados reintentos por límite de ritmo")
+    raise FalloPersistente(f"caso {caso.id}: sigue fallando tras {intentos} intentos: {ultimo}")
 
 
 def _camino(resultado):
@@ -174,9 +188,15 @@ def main():
         if args.limite:
             casos = casos[:args.limite]
         print(f"{len(hechos)} ya hechos, {len(casos)} por hacer con {motor}")
+        saltados = 0
         try:
             for i, caso in enumerate(casos, 1):
-                resultado, llamadas = _ejecutar(grafo, registro, caso)
+                try:
+                    resultado, llamadas = _ejecutar(grafo, registro, caso)
+                except FalloPersistente as e:
+                    saltados += 1
+                    print(f"[{i}/{len(casos)}] {caso.categoria:<22} SALTADO: {e}")
+                    continue
                 fila = _fila(caso, motor, resultado, llamadas)
                 db.add(fila)
                 db.commit()
@@ -187,6 +207,8 @@ def main():
             print("\nCuota agotada. Relánzalo cuando se renueve y sigue por donde lo dejó.")
         except KeyboardInterrupt:
             print("\nParado a mano. Lo ya hecho está guardado.")
+        if saltados:
+            print(f"\n{saltados} casos saltados por fallos persistentes del LLM; siguen pendientes para el próximo relanzamiento.")
     informe(motor)
 
 
