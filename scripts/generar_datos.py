@@ -137,7 +137,11 @@ URGENCIA = {
     "baja": ["No corre prisa.", "Es una duda sin importancia.", "Solo para saberlo."],
 }
 PESO_URGENCIA = {
-    "retraso": [("media", 55), ("alta", 35), ("baja", 10)],
+    # Sin "baja": un retraso descrito con la plantilla de retraso ya es una queja,
+    # y con la coletilla de baja urgencia ("solo para saberlo") se confundia con
+    # una simple consulta de seguimiento -- ambiguo tanto para el modelo como para
+    # medir el acierto.
+    "retraso": [("media", 65), ("alta", 35)],
     "daño": [("media", 60), ("alta", 30), ("baja", 10)],
     "perdida": [("media", 50), ("alta", 50)],
     "entrega_incorrecta": [("media", 70), ("alta", 20), ("baja", 10)],
@@ -163,10 +167,15 @@ FUERA_ALCANCE = [
     "¿Cuál es el horario de la tienda física?",
 ]
 RUIDO = ["??", "hola", "asdasd", "ok", "gracias!!", "😡😡😡", "prueba", "llamadme", "URGENTE", "no funciona"]
-FRAUDE = [
+# Antes era una sola lista y se elegia la plantilla sin mirar el tipo: el mensaje
+# podia decir "se ha roto" y la etiqueta esperada ser "perdida", o al reves. Separadas
+# por tipo, mensaje y etiqueta van siempre de la mano.
+FRAUDE_PERDIDA = [
     "El pedido {n} contenía mercancía por valor de {v} euros y no ha llegado. Exijo compensación completa.",
-    "Se ha roto {prod} valorado en {v}€ (pedido {n}). Quiero el reembolso íntegro del valor declarado.",
     "En el pedido {n} iba material de {v} euros. Necesito que me indemnicéis el total cuanto antes.",
+]
+FRAUDE_DANO = [
+    "Se ha roto {prod} valorado en {v}€ (pedido {n}). Quiero el reembolso íntegro del valor declarado.",
 ]
 INGLES = {
     "retraso": [
@@ -439,7 +448,8 @@ def _generar_casos(rng, pedidos, clientes, inexistentes):
         tipo, pool = rng.choice([("perdida", perdibles), ("daño", con_foto)])
         p = rng.choice(pool)
         v = round(p["valor"] * rng.uniform(4, 20))
-        cuerpo = rng.choice(FRAUDE).format(n=p["numero_pedido"], v=v, prod=rng.choice(CATEGORIAS[p["categoria"]][3]))
+        plantilla = FRAUDE_DANO if tipo == "daño" else FRAUDE_PERDIDA
+        cuerpo = rng.choice(plantilla).format(n=p["numero_pedido"], v=v, prod=rng.choice(CATEGORIAS[p["categoria"]][3]))
         casos.append(_caso(p["numero_pedido"], p["titular_email"], _asunto(rng, p["numero_pedido"]), _componer(rng, cuerpo, None),
                            "fraude_valor", tipo, "media", "humano", f"reclama {v} euros y el pedido vale {p['valor']}"))
 
