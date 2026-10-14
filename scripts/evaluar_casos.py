@@ -168,6 +168,7 @@ def main():
     parser.add_argument("--motor", help="etiqueta del motor; por defecto groq:<modelo>")
     parser.add_argument("--limite", type=int, default=0, help="máximo de casos en esta ejecución (0 = todos)")
     parser.add_argument("--categoria", help="solo esta categoría")
+    parser.add_argument("--prefijo", help="solo las categorías que empiezan así (por ejemplo inj_, neg_, var_)")
     parser.add_argument("--informe", action="store_true", help="solo mostrar el informe, sin ejecutar nada")
     args = parser.parse_args()
     motor = args.motor or f"groq:{settings.modelo_llm}"
@@ -183,7 +184,8 @@ def main():
     with SessionLocal() as db:
         hechos = set(db.scalars(select(ResultadoPrueba.caso_id).where(ResultadoPrueba.motor == motor)))
         casos = [c for c in db.scalars(select(CasoPrueba))
-                 if c.id not in hechos and (not args.categoria or c.categoria == args.categoria)]
+                 if c.id not in hechos and (not args.categoria or c.categoria == args.categoria)
+                 and (not args.prefijo or c.categoria.startswith(args.prefijo))]
         casos = _intercalar(casos)
         if args.limite:
             casos = casos[:args.limite]
