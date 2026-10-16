@@ -124,6 +124,11 @@ class Incidencia(Base):
     sospechoso: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     discrepancia: Mapped[str | None] = mapped_column(Text, nullable=True)
 
+    # Segunda opinion de Clef en modo sombra: se guarda, pero no decide nada.
+    clef_manipulacion: Mapped[float | None] = mapped_column(Float, nullable=True)
+    clef_autorizacion: Mapped[float | None] = mapped_column(Float, nullable=True)
+    clef_estado: Mapped[str | None] = mapped_column(String, nullable=True)  # ok | error | apagado
+
     motivo_decision: Mapped[str | None] = mapped_column(Text, nullable=True)
     motivo_verificacion: Mapped[str | None] = mapped_column(Text, nullable=True)
     respuesta_borrador: Mapped[str | None] = mapped_column(Text, nullable=True)
