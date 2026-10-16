@@ -46,6 +46,10 @@ Las vías están dibujadas de antemano. El modelo trabaja dentro de los nodos, p
 5. **Verificar — con LLM.** El juez de salida: revisa que el borrador no prometa dinero, no filtre datos de otros pedidos, ni se salga del papel.
 6. **Revisar humano.** Todo lo que no es 100% determinista se pausa aquí (`interrupt()`, persistido en Postgres) hasta que una persona lo aprueba o lo rechaza desde el panel.
 
+### Segunda opinión opcional: Clef
+
+Hay un nodo extra, `opinion_clef`, que antes del guardián le pregunta a [Clef](https://developers.cloudflare.com/changelog/post/2026-10-01-clef-workers-ai/) (un modelo de Cloudflare que devuelve probabilidades en vez de texto) dos cosas: si el mensaje intenta dar órdenes al sistema y si afirma una aprobación que no existe. Está apagado por defecto y, encendido, funciona **en modo sombra**: guarda las dos probabilidades en la incidencia y las expone en la API (`clef_manipulacion`, `clef_autorizacion`, `clef_alerta`), pero **no cambia el enrutado**, y si Clef falla el mensaje sigue su camino como si no existiera. Para encenderlo hacen falta `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` y `CLEF_MODO=sombra` en el `.env`.
+
 ---
 
 ## Cómo ejecutarlo
@@ -81,6 +85,19 @@ Los tests de las capas deterministas (guardián, enriquecer, decidir) y el mecan
 
 ---
 
+## Cómo se ha medido
+
+En `scripts/` está todo lo necesario para repetir las medidas:
+
+- `generar_datos.py` y `generar_casos_v2.py`: 5.000 pedidos sintéticos y 5.000 mensajes ya etiquetados (incidencias normales, fraude, 14 familias de prompt injection, negativos difíciles, otros idiomas).
+- `evaluar_casos.py`: pasa los casos por el grafo completo y guarda el resultado de cada uno; se puede cortar y relanzar.
+- `medir_guardian.py`: cuántas inyecciones caza el guardián, sin gastar nada de LLM. De las 1.400 inyecciones nuevas caza 83 (el 6 %).
+- `clef_replay.py`: pasa los casos por Clef. La primera pregunta sola detecta el 77 % de las inyecciones; con la segunda, las familias de ingeniería social (políticas inventadas, contexto falso, autoridad) pasan del 44 %, 21 % y 71 % al 100 %, 95 % y 84 %. Las falsas alarmas son el 4,2 % sobre 928 mensajes legítimos o dudosos, y 0 de 338 sobre mensajes normales en otros idiomas, con erratas o muy largos.
+
+Son datos sintéticos generados con plantillas: sirven para comparar enfoques y para regresión, no para prometer cifras con tráfico real.
+
+---
+
 ## Stack
 
 - **LangGraph** para el grafo de estados, con **PostgreSQL** como backend del checkpointer (lo que hace posible el `interrupt()` real)
@@ -88,12 +105,13 @@ Los tests de las capas deterministas (guardián, enriquecer, decidir) y el mecan
 - **FastAPI** para la API y el panel web (Jinja2)
 - **SQLAlchemy + Alembic** para los datos de negocio (pedidos, incidencias) sobre PostgreSQL
 - **pytest + GitHub Actions** para las pruebas, incluyendo regresión de seguridad
+- **Clef (Cloudflare Workers AI)**, opcional, como segunda opinión con probabilidades en modo sombra
 
 ---
 
 ## Limitaciones, dichas claras
 
-- Los pedidos son de prueba: cuatro registros, uno preparado a propósito para el caso de fraude por valor inflado (igual que en el prototipo).
+- Los datos son de prueba: la app arranca con cuatro pedidos, uno preparado a propósito para el caso de fraude por valor inflado (igual que en el prototipo), y `scripts/generar_datos.py` carga 5.000 más. Ninguna cifra de esta página sale de tráfico real.
 - No hay envío real de email/tickets: la "respuesta enviada" es el texto final que el sistema produce, no una integración con un proveedor de correo o un ticketing real. Añadirla es cuestión de un adaptador en `app/api/` o `app/web/`, no de tocar el grafo.
 - El panel de revisión usa autenticación básica de un solo usuario; para varios revisores haría falta gestión de usuarios de verdad.
 
