@@ -36,6 +36,10 @@ class IncidenciaState(TypedDict):
     remitente: str
     asunto: Optional[str]
     cuerpo_mensaje: str
+    # Clef (segunda opinion en modo sombra: se guarda, no decide nada)
+    clef_manipulacion: Optional[float]
+    clef_autorizacion: Optional[float]
+    clef_estado: Optional[str]
     # Guardian
     sospechoso: Optional[bool]
     motivo_sospecha: Optional[str]
