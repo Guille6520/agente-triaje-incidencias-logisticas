@@ -10,6 +10,7 @@ que es exactamente el reparto de riesgo que ya explicaba el README del prototipo
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import interrupt
 
+from app.graph.clef import nodo_opinion_clef
 from app.graph.nodes import clasificar, decidir, enriquecer, guardian, verificar
 from app.graph.schemas import IncidenciaState
 
@@ -57,6 +58,7 @@ def crear_grafo(checkpointer):
     """El checkpointer se inyecta: MemorySaver en los tests, PostgresSaver en produccion.
     Sin el, interrupt() no tiene donde dejar el estado y no hay pausa ni reanudacion que valga."""
     b = StateGraph(IncidenciaState)
+    b.add_node("opinion_clef", nodo_opinion_clef)
     b.add_node("guardian", guardian)
     b.add_node("clasificar", clasificar)
     b.add_node("enriquecer", enriquecer)
@@ -65,7 +67,8 @@ def crear_grafo(checkpointer):
     b.add_node("revisar_humano", revisar_humano)
     b.add_node("auto_resuelto", auto_resuelto)
 
-    b.add_edge(START, "guardian")
+    b.add_edge(START, "opinion_clef")
+    b.add_edge("opinion_clef", "guardian")
     b.add_conditional_edges("guardian", router_guardian, {"clasificar": "clasificar", "revisar_humano": "revisar_humano"})
     b.add_edge("clasificar", "enriquecer")
     b.add_edge("enriquecer", "decidir")

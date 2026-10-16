@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     # Clef (Cloudflare Workers AI): segunda opinion con probabilidades, solo se usa en los scripts de evaluacion por ahora
     cloudflare_account_id: str = ""
     cloudflare_api_token: str = ""
+    # apagado = no se llama a Clef; sombra = se llama y se guarda la opinion, sin influir en el enrutado
+    clef_modo: str = "apagado"
+    clef_umbral: float = 0.5
     modelo_llm: str = "openai/gpt-oss-120b"
 
     # Datos de negocio (pedidos, incidencias), via SQLAlchemy
