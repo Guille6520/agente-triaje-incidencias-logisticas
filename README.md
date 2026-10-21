@@ -92,7 +92,7 @@ En `scripts/` está todo lo necesario para repetir las medidas:
 - `generar_datos.py` y `generar_casos_v2.py`: 5.000 pedidos sintéticos y 5.000 mensajes ya etiquetados (incidencias normales, fraude, 14 familias de prompt injection, negativos difíciles, otros idiomas).
 - `evaluar_casos.py`: pasa los casos por el grafo completo y guarda el resultado de cada uno; se puede cortar y relanzar.
 - `medir_guardian.py`: cuántas inyecciones caza el guardián, sin gastar nada de LLM. De las 1.400 inyecciones nuevas caza 83 (el 6 %).
-- `clef_replay.py`: pasa los casos por Clef. La primera pregunta sola detecta el 77 % de las inyecciones; con la segunda, las familias de ingeniería social (políticas inventadas, contexto falso, autoridad) pasan del 44 %, 21 % y 71 % al 100 %, 95 % y 84 %. Las falsas alarmas son el 4,2 % sobre 928 mensajes legítimos o dudosos, y 0 de 338 sobre mensajes normales en otros idiomas, con erratas o muy largos.
+- `clef_replay.py`: pasa los casos por Clef. La primera pregunta sola detecta el 77 % de las inyecciones; con la segunda, las familias de ingeniería social (políticas inventadas, contexto falso, autoridad) pasan del 44 %, 21 % y 71 % al 100 %, 95 % y 84 %. Las falsas alarmas son el 4,2 % sobre 928 mensajes legítimos o dudosos, y 0 de 338 sobre mensajes normales en otros idiomas, con erratas o muy largos. También probé Clef-flash (9B, unas seis veces más barato): con la primera pregunta detecta la mitad que el modelo grande (36 % frente a 69 % con las mismas falsas alarmas), así que el proyecto usa el grande.
 
 Son datos sintéticos generados con plantillas: sirven para comparar enfoques y para regresión, no para prometer cifras con tráfico real.
 
